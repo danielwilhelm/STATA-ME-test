@@ -1,7 +1,7 @@
 /*
 	Monte Carlo study in Delgado and Gonzalez Manteiga (AoS, 2001)
 	
-18/05/2017
+23/06/2017
 
 Samples are generated according to the model
 	
@@ -11,10 +11,10 @@ Samples are generated according to the model
 	X,Z ~ i.i.d. U(0,1) and independent of U
 	m(X) = 1 + X or m(X) = 1 + sin(10*X)
 
-	Modify	(1) the number of observation,
-			(2) depvar and expvar following the settings in DGM (AoS, 2001), or
-			(3) add specific option values in dgmtest
-				default: q(1) kernel(epanechnikov) bw(0.21544) bootdist(mammen) bootnum(500)
+	Modify (1) the number of observation,
+	       (2) depvar and expvar following the settings in DGM (AoS, 2001), or
+	       (3) add specific option values in dgmtest
+	           default: q(1) teststat(CvM) kernel(epanechnikov) bw(0.21544) bootdist(mammen) bootnum(500)
 */
 
 *************** SIMUL_DGMTEST CODE *******************************************
@@ -24,7 +24,7 @@ capture program drop dgmtest
 clear
 
 // Number of observations = sample size (DGM (2001): n=50 or n=100)
-set obs 100
+set obs 50
 
 // Error U are generated from N(0,1)
 generate U = rnormal()
@@ -49,8 +49,8 @@ generate Y41 = 1 + X1 + X2 + sin(5*Z1) + U
 generate Y42 = 1 + X1 + X2 + sin(10*Z1) + U
 
 // Bootstrap Significance Testing
-// e.g., Table 1.2: dgmtest Y11 X1 Z1 Z2 [, options]
-// e.g., Table 4.1: dgmtest Y41 X1 X2 Z1, q(2) [other options]
-dgmtest Y42 X1 X2 Z1, q(2) bootnum(1000)
+// e.g., Table 1.2: dgmtest Y11 X1 Z1 Z2 [, options]           50^(-1/3)=0.2714; 100^(-1/3)=0.2154
+// e.g., Table 4.1: dgmtest Y41 X1 X2 Z1, q(2) [other options] 50^(-1/6)=0.5210; 100^(-1/6)=0.4642
+dgmtest Y42 X1 X2 Z1, q(2) kernel(epan2) bw(0.5210) bootnum(2000)
 
 end
