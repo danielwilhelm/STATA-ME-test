@@ -69,11 +69,11 @@ program define dgmtest
 		display "Kernel: epanechnikov, which is our default"
 		local kernel = "epanechnikov"
 		}
-		else if (inlist("`kernel'","biweight","epanechnikov","epan2","normal","rectangle","triangular")) {
+		else if (inlist("`kernel'","biweight","epanechnikov","epan2","epan4","normal","rectangle","triangular")) {
 		display "Kernel: `kernel'"
 		}
 		else {
-		display "Choose a kernel among biweight, epanechnikov (default), epan2, normal, rectangle, and triangular"
+		display "Choose a kernel among biweight, epanechnikov (default), epan2, epan4, normal, rectangle, and triangular"
 		error 111
 		}
 		
