@@ -13,7 +13,7 @@ for selecting explanatory variables in nonparametric regression.
 
 Syntax:
 	dgmtest depvar expvar [if] [in]
-		[, q(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer)]
+		[, q(integer) teststat(string) kernel(string) bootdist(string) cbw(real) bootnum(integer)]
 	where
 	q       : dimension of X (default = 1)
 	teststat: Test statistic, options: CvM (default), KS
