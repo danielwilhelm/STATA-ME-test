@@ -14,7 +14,7 @@ Samples are generated according to the model
 	Modify (1) the number of observation,
 	       (2) depvar and expvar following the settings in DGM (AoS, 2001), or
 	       (3) add specific option values in dgmtest
-	           default: q(1) teststat(CvM) kernel(epanechnikov) cbw(1) bootdist(mammen) bootnum(500)
+	           default: q(1) teststat(CvM) kernel(epanechnikov) cbw(1) bootdist(mammen) bootnum(500) ngrid(0)
 */
 
 *************** SIMUL_DGMTEST CODE *******************************************
