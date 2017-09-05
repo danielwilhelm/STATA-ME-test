@@ -1,7 +1,7 @@
 /*
 	Monte Carlo study in Delgado and Gonzalez Manteiga (AoS, 2001)
 	
-23/06/2017
+05/09/2017
 
 Samples are generated according to the model
 	
