@@ -19,7 +19,7 @@ Syntax:
 	teststat: Test statistic, options: CvM (default), KS
 	kernel  : kernel function
 	          options: biweight, epanechnikov (default), epan2 (DGM, 2001), epan4, normal, rectangle, triangular
-	bw      : bandwidth of kernel function (default = 0.21544 = 100^(-1/3))
+	cbw     : constant 'C' to be chosen for the bandwidth in DGM (AoS, 2001) (default = 1, bw = cbw*(n^(-1/3q)))
 	bootdist: distribution with bounded support, zero mean, and unit variance
 	          options: mammen (default), rademacher, and uniform
 	bootnum : number of bootstrap samples (default = 500)
@@ -35,7 +35,7 @@ If unspecified, the command runs on a default setting.
 program define dgmtest
 		version 12
 		
-		syntax varlist(min=2) [if] [in] [, q(integer 1) teststat(string) kernel(string) bw(real 0.21544) bootdist(string) bootnum(integer 500)]
+		syntax varlist(min=2) [if] [in] [, q(integer 1) teststat(string) kernel(string) cbw(real 1) bootdist(string) bootnum(integer 500)]
 		marksample touse
 		
 		gettoken Y W : varlist
@@ -77,8 +77,8 @@ program define dgmtest
 		error 111
 		}
 		
-		// bandwidth is a positive real number
-		//if (`bw' <= 0) {
+		// Constant 'cbw' for bandwidth should be a positive real number
+		//if (`cbw' <= 0) {
 		//display "bandwidth should greater than zero"
 		//error 111
 		//}
@@ -102,7 +102,7 @@ program define dgmtest
 		//}
 
 	// Running main program
-		mata: test("`Y'","`W'",`q',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum')
+		mata: test("`Y'","`W'",`q',"`teststat'","`kernel'",`cbw',"`bootdist'",`bootnum')
 		display as txt " `teststat' = " as res r(stat)
 		display as txt " p(`teststat' < `teststat'*) = " as res r(pstat)
 end
@@ -112,7 +112,7 @@ mata:
 
 // Significance test
 void test(string scalar yname, string scalar wname, real scalar q,
-          string scalar teststat, string scalar kernel, real scalar bw,
+          string scalar teststat, string scalar kernel, real scalar cbw,
           string scalar bootdist, real scalar bootnum)
 {	real matrix W, X
 	real colvector Y, statst
@@ -121,6 +121,7 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	Y = st_data(., yname, 0)
 	W = st_data(., wname, 0)
 	X = W[|1,1 \ rows(Y),q|]
+	bw = cbw*(rows(Y)^(-1/(3*q)))
 	
 	stat	= mstat(Y, W, X, teststat, kernel, bw)
 	statst  = mstat(btrs(Y, X, kernel, bw, bootdist, bootnum), W, X, teststat, kernel, bw)
