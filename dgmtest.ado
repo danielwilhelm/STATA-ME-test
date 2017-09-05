@@ -23,7 +23,7 @@ Syntax:
 	bootdist: distribution with bounded support, zero mean, and unit variance
 	          options: mammen (default), rademacher, and uniform
 	bootnum : number of bootstrap samples (default = 500)
-	ngrid   : number of grid points for each variable in KS statistic (default = 0 => we use exact observation values for W)
+	ngrid   : number of grid points for each variable in KS statistic (default = 0 => we use exact observation values of W)
 
 Outcome:
 	r(stat) : scalar value of the Cramer-von Mises statistic
