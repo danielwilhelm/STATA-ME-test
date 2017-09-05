@@ -13,7 +13,7 @@ for selecting explanatory variables in nonparametric regression.
 
 Syntax:
 	dgmtest depvar expvar [if] [in]
-		[, q(integer) teststat(string) kernel(string) bootdist(string) cbw(real) bootnum(integer)]
+		[, q(integer) teststat(string) kernel(string) bootdist(string) cbw(real) bootnum(integer) ngrid(integer)]
 	where
 	q       : dimension of X (default = 1)
 	teststat: Test statistic, options: CvM (default), KS
@@ -23,6 +23,7 @@ Syntax:
 	bootdist: distribution with bounded support, zero mean, and unit variance
 	          options: mammen (default), rademacher, and uniform
 	bootnum : number of bootstrap samples (default = 500)
+	ngrid   : number of grid points for each variable in KS statistic (default = 0 => we use exact observation values for W)
 
 Outcome:
 	r(stat) : scalar value of the Cramer-von Mises statistic
@@ -35,7 +36,7 @@ If unspecified, the command runs on a default setting.
 program define dgmtest
 		version 12
 		
-		syntax varlist(min=2) [if] [in] [, q(integer 1) teststat(string) kernel(string) cbw(real 1) bootdist(string) bootnum(integer 500)]
+		syntax varlist(min=2) [if] [in] [, q(integer 1) teststat(string) kernel(string) cbw(real 1) bootdist(string) bootnum(integer 500) ngrid(integer 0)]
 		marksample touse
 		
 		gettoken Y W : varlist
@@ -102,7 +103,7 @@ program define dgmtest
 		//}
 
 	// Running main program
-		mata: test("`Y'","`W'",`q',"`teststat'","`kernel'",`cbw',"`bootdist'",`bootnum')
+		mata: test("`Y'","`W'",`q',"`teststat'","`kernel'",`cbw',"`bootdist'",`bootnum',`ngrid')
 		display as txt " `teststat' = " as res r(stat)
 		display as txt " p(`teststat' < `teststat'*) = " as res r(pstat)
 end
@@ -113,7 +114,7 @@ mata:
 // Significance test
 void test(string scalar yname, string scalar wname, real scalar q,
           string scalar teststat, string scalar kernel, real scalar cbw,
-          string scalar bootdist, real scalar bootnum)
+          string scalar bootdist, real scalar bootnum, real scalar ngrid)
 {	real matrix W, X
 	real colvector Y, statst
 	real scalar stat, pstat
@@ -123,8 +124,8 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	X = W[|1,1 \ rows(Y),q|]
 	bw = cbw*(rows(Y)^(-1/(3*q)))
 	
-	stat	= mstat(Y, W, X, teststat, kernel, bw)
-	statst  = mstat(btrs(Y, X, kernel, bw, bootdist, bootnum), W, X, teststat, kernel, bw)
+	stat	= mstat(Y, W, X, teststat, kernel, bw, ngrid)
+	statst  = mstat(btrs(Y, X, kernel, bw, bootdist, bootnum), W, X, teststat, kernel, bw, ngrid)
 	
 	pstat	= sum(statst :> stat)/bootnum
 	st_numscalar("r(stat)", stat)
@@ -134,7 +135,7 @@ void test(string scalar yname, string scalar wname, real scalar q,
 // Test statistic for conditional mean and its bootstrap versions
 real colvector mstat(real matrix Y, real matrix W, real matrix X,
                      string scalar teststat, string scalar kernel,
-                     real scalar bw)
+                     real scalar bw, real scalar ngrid)
 {	real matrix K, dX, Ti, W1, dW, Tn
 	real colvector iota, statV
 	real scalar n, i
@@ -157,6 +158,7 @@ real colvector mstat(real matrix Y, real matrix W, real matrix X,
 	statV = rowsum(Tn:^2)
 	}
 	else if (teststat == "KS") {
+	if (ngrid == 0) {
 	W1 = iota
 	for (i = 1; i <= cols(W); i++) {
 		dW = W[|1,i \ n,i|]*iota' - iota*W[|1,i \ n,i|]'
@@ -164,6 +166,19 @@ real colvector mstat(real matrix Y, real matrix W, real matrix X,
 		W1 = (W1#J(1,cols(dW),1)) :* (J(1,cols(W1),1)#dW)
 		W1 = uniqrows(W1')'
 		}
+	}
+	else {
+	W1 = iota
+	Wmin = floor(colmin(W))
+	Wmax = ceil(colmax(W))
+	Wgrid = (Wmax - Wmin) :/ ngrid
+	for (i = 1; i <= cols(W); i++) {
+		dW = W[|1,i \ n,i|]*J(10,1,1)' - iota*rangen(Wmin[1,i]+Wgrid[1,i],Wmax[1,i],ngrid)'
+		dW = uniqrows((dW:<=0)')'
+		W1 = (W1#J(1,cols(dW),1)) :* (J(1,cols(W1),1)#dW)
+		W1 = uniqrows(W1')'
+		}
+	}
 	Tn    = (Ti'*W1) :/ (n^2 * bw^cols(X))
 	statV = rowmax(abs((n^(1/2)):*Tn))
 	}
