@@ -1,7 +1,7 @@
 /*
 	Significance Testing in Nonparametric Regression Based on the Bootstrap
 
-23/06/2017
+05/09/2017
 
 This program is developed for a testing methodology, in Delgado and Gonzalez-Manteiga (AoS, 2001),
 for selecting explanatory variables in nonparametric regression.
