@@ -21,4 +21,5 @@ generate epsilon = runiform()
 // outcome equation
 generate Y = Xstar^2 + 0.2*Xstar + 0.5*epsilon
 
+// perform the test of the hypothesis of no measurement error in X
 dgmtest Y X Z
