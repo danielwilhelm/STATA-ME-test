@@ -8,6 +8,7 @@ Files contained in this package:
 
 - The file `dgmtest.ado` contains the `dgmtest` command.
 - The file `simul_dgmtest.ado` contains code to replicate the simulations in Delgado and Manteiga (2001).
+- The file `example.do` contains the simple simulation example shown below.
 
 
 ## Installation
@@ -90,4 +91,5 @@ dgmtest Y X Z
 
 # Reference
 [Wilhelm, D. (2017), "Testing for the Presence of Measurement Error", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
+
 [Delgado, M. and Manteiga, W., "Significance Testing in Nonparametric Regression Based on the Bootstrap", Annals of Statistics, 2001, 29(5), p. 1469-1507](http://www.jstor.org/stable/2699997)
