@@ -51,6 +51,19 @@ program define dgmtest
 		local Y `Y'
 		local W `W'
 	
+	
+		display "----------------------------------------------------- "
+		display " Delgado and Manteiga test
+		display	"----------------------------------------------------- "
+		
+		display " "
+		display "H0: E[Y | X,Z] = E[Y | X]"
+		display " "
+		
+		display "----- parameter settings -----"
+		display " "
+	
+	
 	// Checking inputs
 		// q should be a positive integer, but less than p+q, dimension of W
 		if (`q' < 1) {
@@ -92,13 +105,13 @@ program define dgmtest
 		
 		if ("`bootdist'" == "") {
 		local bootdist = "mammen"
-		display "r.v. for V: mammen (AoS, 1993) (default)"
+		display "bootstrap multiplier distribution: mammen (default)"
 		}
 		else if (inlist("`bootdist'","mammen","uniform","rademacher")) {
-		display "r.v. for V: `bootdist'"
+		display "bootstrap multiplier distribution: `bootdist'"
 		}
 		else {
-		display "Choose a distribution among Mammen (default), Rademacher and Uniform for V"
+		display "Choose a distribution among mammen (default), rademacher and uniform"
 		error 197
 		}
 		
@@ -122,11 +135,17 @@ program define dgmtest
 
 	// Running main program
 		mata: test("`Y'","`W'",`q',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum',`ngrid',`qgrid')
+		display " "
 		display as txt " bandwidth: " as res r(bw)
 		display as txt " dimension of X: " as res r(dimX)
 		display as txt " dimension of Z: " as res r(dimZ)
-		display as txt " `teststat' = " as res r(stat)
 		display as txt " number of bootstrap samples: " as res r(bootnum)
+		
+		display " "
+		display "----- test results -----"
+		display " "
+				
+		display as txt " `teststat' = " as res r(stat)
 		display as txt " bootstrap critical value at 1%: " as res r(pstat1)
 		display as txt " bootstrap critical value at 5%: " as res r(pstat5)
 		display as txt " bootstrap critical value at 10%: " as res r(pstat10)
