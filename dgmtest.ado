@@ -31,6 +31,7 @@ Outcome:
 	r(dimX)   : diminsion of X
 	r(dimZ)   : diminsion of Z
 	r(stat)   : scalar value of the Cramer-von Mises statistic
+	r(bootnum): number of bootstrap samples
 	r(pstat1) : bootstrap critical value at 1%
 	r(pstat5) : bootstrap critical value at 1%
 	r(pstat10): bootstrap critical value at 10%
@@ -125,6 +126,7 @@ program define dgmtest
 		display as txt " dimension of X: " as res r(dimX)
 		display as txt " dimension of Z: " as res r(dimZ)
 		display as txt " `teststat' = " as res r(stat)
+		display as txt " number of bootstrap samples: " as res r(bootnum)
 		display as txt " bootstrap critical value at 1%: " as res r(pstat1)
 		display as txt " bootstrap critical value at 5%: " as res r(pstat5)
 		display as txt " bootstrap critical value at 10%: " as res r(pstat10)
@@ -158,6 +160,7 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	st_numscalar("r(dimX)", q)
 	st_numscalar("r(dimZ)", cols(W)-q)
 	st_numscalar("r(stat)", stat)
+	st_numscalar("r(bootnum)", bootnum)
 	st_numscalar("r(pstat1)", qtile(statst,0.99))
 	st_numscalar("r(pstat5)", qtile(statst,0.95))
 	st_numscalar("r(pstat10)", qtile(statst,0.9))
