@@ -1,21 +1,22 @@
 /*
 	Significance Testing in Nonparametric Regression Based on the Bootstrap
 
-06/09/2017
+10/09/2017
 
 This program is developed for a testing methodology, in Delgado and Gonzalez-Manteiga (AoS, 2001),
 for selecting explanatory variables in nonparametric regression.
 
-	H0: E(Y|W) = m(X) a.s.,
+	H0: E(Y|W) = a*XL + m(X) a.s.,
 	where	m(.) = E(Y|X=.),
 			Y is a scalar, and
-			W = (X,Z), X is R^q valued and Z is R^p valued.
+			W = (XL,X,Z), XL is R^ql valued, X is R^q valued and Z is R^p valued.
 
 Syntax:
 	dgmtest depvar expvar [if] [in]
-		[, q(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
+		[, q(integer) ql(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
 	where
 	q       : dimension of X (default = 1)
+	ql      : dimension of additively linear control variables XL (default = 0)
 	teststat: Test statistic, options: CvM (default), KS
 	kernel  : kernel function
 	          options: biweight, epanechnikov (default), epan2 (DGM, 2001), epan4, normal, rectangle, triangular
@@ -27,24 +28,28 @@ Syntax:
 	qgrid   : quantile probability for maximum or minimum grid points in KS statistic(default = 0)
 
 Outcome:
-	r(bw)     : bandwidth
-	r(dimX)   : diminsion of X
-	r(dimZ)   : diminsion of Z
-	r(stat)   : scalar value of the Cramer-von Mises statistic
-	r(bootnum): number of bootstrap samples
-	r(pstat1) : bootstrap critical value at 1%
-	r(pstat5) : bootstrap critical value at 1%
-	r(pstat10): bootstrap critical value at 10%
-	r(pstat)  : P[stat < statnstar]
+	e(bw)     : bandwidth
+	e(dimX)   : diminsion of X
+	e(dimXL)  : dimension of additively linear control variables XL
+	e(dimZ)   : diminsion of Z
+	e(stat)   : scalar value of the Cramer-von Mises statistic
+	e(bootnum): number of bootstrap samples
+	e(btcv1)  : bootstrap critical value at 1%
+	e(btcv5)  : bootstrap critical value at 5%
+	e(btcv10) : bootstrap critical value at 10%
+	e(btpv)   : P[stat < statnstar]
 
 If unspecified, the command runs on a default setting.
 */
 
 *************** MAIN DGMTEST CODE ********************************************
-program define dgmtest
+program define dgmtest, eclass
 		version 12
 		
-		syntax varlist(min=2) [if] [in] [, q(integer 1) teststat(string) kernel(string) bw(real 0) bootdist(string) bootnum(integer 500) ngrid(integer 0) qgrid(real 0)]
+		syntax varlist(min=2) [if] [in] [, q(integer 1) ql(integer 0) teststat(string) kernel(string) bw(real 0) bootdist(string) bootnum(integer 500) ngrid(integer 0) qgrid(real 0)]
+		ereturn clear
+		ereturn local cmd = "dgmtest"
+		ereturn local title  = "Nonparametric Significance Test"
 		marksample touse
 		
 		gettoken Y W : varlist
@@ -57,7 +62,12 @@ program define dgmtest
 		display	"----------------------------------------------------- "
 		
 		display " "
+		if (`ql' == 0) {
 		display "H0: E[Y | X,Z] = E[Y | X]"
+		}
+		else {
+		display "H0: E[Y | XL,X,Z] = a*XL + E[Y | X]"
+		}
 		display " "
 		
 		display "----- parameter settings -----"
@@ -68,6 +78,11 @@ program define dgmtest
 		// q should be a positive integer, but less than p+q, dimension of W
 		if (`q' < 1) {
 		display "q should be a positive integer"
+		error 111
+		}
+		
+		if (`ql' < 0) {
+		display "ql should be a nonnegative integer"
 		error 111
 		}
 		
@@ -134,22 +149,23 @@ program define dgmtest
 		}
 
 	// Running main program
-		mata: test("`Y'","`W'",`q',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum',`ngrid',`qgrid')
+		mata: test("`Y'","`W'",`q',`ql',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum',`ngrid',`qgrid')
 		display " "
-		display as txt " bandwidth: " as res r(bw)
-		display as txt " dimension of X: " as res r(dimX)
-		display as txt " dimension of Z: " as res r(dimZ)
-		display as txt " number of bootstrap samples: " as res r(bootnum)
+		display as txt " bandwidth: " as res e(bw)
+		display as txt " dimension of X: " as res e(dimX)
+		display as txt " dimension of XL: " as res e(dimXL)
+		display as txt " dimension of Z: " as res e(dimZ)
+		display as txt " number of bootstrap samples: " as res e(bootnum)
 		
 		display " "
 		display "----- test results -----"
 		display " "
 				
-		display as txt " `teststat' = " as res r(stat)
-		display as txt " bootstrap critical value at 1%: " as res r(pstat1)
-		display as txt " bootstrap critical value at 5%: " as res r(pstat5)
-		display as txt " bootstrap critical value at 10%: " as res r(pstat10)
-		display as txt " p(`teststat' < `teststat'*) = " as res r(pstat)
+		display as txt " `teststat' = " as res e(stat)
+		display as txt " bootstrap critical value at 1%: " as res e(btcv1)
+		display as txt " bootstrap critical value at 5%: " as res e(btcv5)
+		display as txt " bootstrap critical value at 10%: " as res e(btcv10)
+		display as txt " p(`teststat' < `teststat'*) = " as res e(btpv)
 end
 
 *************** Define a mata function computing test statistic ****************
@@ -157,7 +173,7 @@ mata:
 
 // Significance test
 void test(string scalar yname, string scalar wname, real scalar q,
-          string scalar teststat, string scalar kernel,
+          real scalar ql, string scalar teststat, string scalar kernel,
 	  real scalar bw, string scalar bootdist, real scalar bootnum,
 	  real scalar ngrid, real scalar qgrid)
 {	real matrix W, X
@@ -166,24 +182,34 @@ void test(string scalar yname, string scalar wname, real scalar q,
 
 	Y = st_data(., yname, 0)
 	W = st_data(., wname, 0)
-	X = W[|1,1 \ rows(Y),q|]
+	X = W[|1,ql+1 \ rows(Y),ql+q|]
+	
 	if (bw == 0) {
 	bw = rows(Y)^(-1/(3*q))
+	}
+	
+	if (ql > 0) {
+	XL  = W[|1,1 \ rows(Y),ql|]
+	eXL = XL - npreg(XL, X, kernel, bw)
+	eY  = Y - npreg(Y, X, kernel, bw)
+	Y   = Y - invsym(eXL'*eXL)*(eXL'*eY)*XL
+	W   = W[|1,ql+1 \ rows(Y),cols(W)|]
 	}
 	
 	stat	= mstat(Y, W, X, teststat, kernel, bw, ngrid, qgrid)
 	statst  = mstat(btrs(Y, X, kernel, bw, bootdist, bootnum), W, X, teststat, kernel, bw, ngrid, qgrid)
 	
 	pstat	= sum(statst :> stat)/bootnum
-	st_numscalar("r(bw)", bw)
-	st_numscalar("r(dimX)", q)
-	st_numscalar("r(dimZ)", cols(W)-q)
-	st_numscalar("r(stat)", stat)
-	st_numscalar("r(bootnum)", bootnum)
-	st_numscalar("r(pstat1)", qtile(statst,0.99))
-	st_numscalar("r(pstat5)", qtile(statst,0.95))
-	st_numscalar("r(pstat10)", qtile(statst,0.9))
-	st_numscalar("r(pstat)", pstat)
+	st_numscalar("e(bw)", bw)
+	st_numscalar("e(dimX)", q)
+	st_numscalar("e(dimXL)", ql)
+	st_numscalar("e(dimZ)", cols(W)-q)
+	st_numscalar("e(stat)", stat)
+	st_numscalar("e(bootnum)", bootnum)
+	st_numscalar("e(btcv1)", qtile(statst,0.99))
+	st_numscalar("e(btcv5)", qtile(statst,0.95))
+	st_numscalar("e(btcv10)", qtile(statst,0.9))
+	st_numscalar("e(btpv)", pstat)
 }
 
 // Test statistic for conditional mean and its bootstrap versions
