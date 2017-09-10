@@ -6,10 +6,10 @@
 This program is developed for a testing methodology, in Delgado and Gonzalez-Manteiga (AoS, 2001),
 for selecting explanatory variables in nonparametric regression.
 
-	H0: E(Y|W) = a*XL + m(X) a.s.,
+	H0: E(Y|W) = m(X) + a*XL a.s.,
 	where	m(.) = E(Y|X=.),
 			Y is a scalar, and
-			W = (XL,X,Z), XL is R^ql valued, X is R^q valued and Z is R^p valued.
+			W = (X,Z,XL), X is R^q valued, Z is R^p valued and XL is R^ql valued.
 
 Syntax:
 	dgmtest depvar expvar [if] [in]
@@ -182,18 +182,18 @@ void test(string scalar yname, string scalar wname, real scalar q,
 
 	Y = st_data(., yname, 0)
 	W = st_data(., wname, 0)
-	X = W[|1,ql+1 \ rows(Y),ql+q|]
+	X = W[|1,1 \ rows(Y),q|]
 	
 	if (bw == 0) {
 	bw = rows(Y)^(-1/(3*q))
 	}
 	
 	if (ql > 0) {
-	XL  = W[|1,1 \ rows(Y),ql|]
+	XL  = W[|1,cols(W)-ql+1 \ rows(Y),cols(W)|]
 	eXL = XL - npreg(XL, X, kernel, bw)
 	eY  = Y - npreg(Y, X, kernel, bw)
 	Y   = Y - invsym(eXL'*eXL)*(eXL'*eY)*XL
-	W   = W[|1,ql+1 \ rows(Y),cols(W)|]
+	W   = W[|1,1 \ rows(Y),cols(W)-ql|]
 	}
 	
 	stat	= mstat(Y, W, X, teststat, kernel, bw, ngrid, qgrid)
