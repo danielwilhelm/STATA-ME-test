@@ -1,20 +1,21 @@
 /*
 	Monte Carlo study in Delgado and Gonzalez Manteiga (AoS, 2001)
 	
-06/09/2017
+10/09/2017
 
 Samples are generated according to the model
 	
-	Y = m(X) + b*sin(a*Z) + U
+	Y = a*XL + m(X) + b*sin(a*Z) + U
 	where
 	U ~ N(0,1)
 	X,Z ~ i.i.d. U(0,1) and independent of U
-	m(X) = 1 + X or m(X) = 1 + sin(10*X)
+	e.g., m(X) = 1 + X or m(X) = 1 + sin(10*X);
+	e.g., XL = X1, m(X) = 1 + X2
 
 	Modify (1) the number of observation,
 	       (2) depvar and expvar following the settings in DGM (AoS, 2001), or
 	       (3) add specific option values in dgmtest
-	           default: q(1) teststat(CvM) kernel(epanechnikov) bw(0) bootdist(mammen) bootnum(500) ngrid(0) qgrid(0)
+	           default: q(1) ql(0) teststat(CvM) kernel(epanechnikov) bw(0) bootdist(mammen) bootnum(500) ngrid(0) qgrid(0)
 */
 
 *************** SIMUL_DGMTEST CODE *******************************************
