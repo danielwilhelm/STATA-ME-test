@@ -20,7 +20,7 @@ Files contained in this package:
 The command `dgmtest` tests the null hypothesis
 
 ```
-H0:   E[Y | X,Z] = E[Y | X] (or E[Y | X,Z,XL] = E[Y | X] + a*XL)
+H0:   E[Y | X,Z] = E[Y | X] (or E[Y| X,Z,XL] = g(X) + a*XL)
 ```
 
 against the alternative that the null does not hold, where
