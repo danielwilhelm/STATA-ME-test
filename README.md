@@ -20,31 +20,33 @@ Files contained in this package:
 The command `dgmtest` tests the null hypothesis
 
 ```
-H0:   E[Y | X,Z] = E[Y | X]
+H0:   E[Y | X,Z] = E[Y | X] (or E[Y | X,Z,XL] = E[Y | X] + a*XL)
 ```
 
 against the alternative that the null does not hold, where
 
-- Y is a scalar dependent variable (`depvar`) 
+- Y is a scalar dependent variable (`depvar`)
 - X is a vector of explanatory variables (`expvar`)
 - Z is a vector of explanatory variables (`expvar`)
+- XL is a vector of additively linear control variables (`expvar`)
 
-Wilhelm (2017) shows that, under certain conditions, the null hypothesis H0 is equivalent to the null hypothesis of no measurement error in X. Most importantly, Z has to be an excluded variable for the outcome equation of Y.
+Wilhelm (2017) shows that, under certain conditions, the null hypothesis H0 is equivalent to the null hypothesis of no measurement error in X. Most importantly, Z has to be an excluded variable for the outcome equation of Y. If we have additively linear control variables, we appy the test in Delgado and Manteiga (2001) after replacing Y with (Y - ahat * XL) where ahat is the Robinson (1988)'s estimator.
 
 Syntax:
 
 ```
-dgmtest depvar expvar [if] [in] [, q(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
+dgmtest depvar expvar [if] [in] [, q(integer) ql(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
 ```
 
 where
 
 - `depvar` is the outcome variable Y
-- `expvar` is a list of variables containing all elements of X and Z
+- `expvar` is a list of variables containing all elements of X, Z, and XL (oder of `expvar`: X Z XL)
 
 The options are as follows:
 
 - `q` is the dimension of X (default = 1).
+- `ql` is the dimension of XL (default = 0).
 - `teststat` is the type of test statistic to be used: Cramer-van Mises (CvM, default) or Kolmogorov-Smirnov (KS).
 - `kernel` is the kernel function: biweight, epanechnikov (default), epan2, epan4, normal, rectangle, triangular.
 - `bw` is the bandwidth (default = n^(-1/3q), rule of thumb, where n is the sample size and q the dimension of X).
@@ -71,6 +73,9 @@ generate etaX = runiform()
 // mismeasured regressor
 generate X = Xstar + 0.5*etaX
 
+// additively linear control variable
+generate XL = runiform()
+
 // measurement error in Z
 generate etaZ = runiform()
 
@@ -81,10 +86,12 @@ generate Z = Xstar + 0.5*etaZ
 generate epsilon = runiform()
 
 // outcome equation
-generate Y = Xstar^2 + 0.2*Xstar + 0.5*epsilon
+generate Y1 = Xstar^2 + 0.2*Xstar + 0.5*epsilon
+generate Y2 = 0.5*XL + Xstar^2 + 0.2*Xstar + 0.5*epsilon
 
 // perform the test of the hypothesis of no measurement error in X
-dgmtest Y X Z
+dgmtest Y1 X Z
+dgmtest Y2 X Z XL, ql(1)
 ```
 
 
