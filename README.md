@@ -20,7 +20,13 @@ Files contained in this package:
 The command `dgmtest` tests the null hypothesis
 
 ```
-H0:   E[Y | X,Z] = E[Y | X] (or E[Y| X,Z,XL] = g(X) + a*XL)
+H0:   E[Y | X,Z] = E[Y | X]
+```
+
+or
+
+```
+H0:   E[Y | X,XL,Z] = E[Y | X,XL]
 ```
 
 against the alternative that the null does not hold, where
@@ -30,7 +36,7 @@ against the alternative that the null does not hold, where
 - Z is a vector of explanatory variables (`expvar`)
 - XL is a vector of additively linear control variables (`expvar`)
 
-Wilhelm (2017) shows that, under certain conditions, the null hypothesis H0 is equivalent to the null hypothesis of no measurement error in X. Most importantly, Z has to be an excluded variable for the outcome equation of Y. If we have additively linear control variables, we appy the test in Delgado and Manteiga (2001) after replacing Y with (Y - ahat * XL) where ahat is the Robinson (1988)'s estimator.
+Wilhelm (2017) shows that, under certain conditions, the null hypothesis H0 is equivalent to the null hypothesis of no measurement error in X. Most importantly, Z has to be an excluded variable for the outcome equation of Y. If we have additively linear control variables, we apply the test in Delgado and Manteiga (2001) after replacing Y with (Y - ahat * XL) where ahat is the Robinson (1988)'s estimator.
 
 Syntax:
 
