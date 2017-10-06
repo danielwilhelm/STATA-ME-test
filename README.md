@@ -66,7 +66,9 @@ If options are left unspecified, the command runs on the default settings.
 
 ## Examples
 
-Testing for measurement error in simulated data, using the default options:
+### Generate explanatory variables
+
+
 ```
 set obs 200
 
@@ -90,21 +92,45 @@ generate Z = Xstar + 0.5*etaZ
 
 // regression error
 generate epsilon = runiform()
+```
 
-// outcome equation
+
+### Generate outcome variable
+
+We generate an outcome in two different ways, in a regression with and without additively separable, linear controls:
+
+```
+// outcome equation with controls
 generate Y1 = Xstar^2 + 0.2*Xstar + 0.5*epsilon
-generate Y2 = 0.5*XL + Xstar^2 + 0.2*Xstar + 0.5*epsilon
 
+// outcome equation without controls
+generate Y2 = 0.5*XL + Xstar^2 + 0.2*Xstar + 0.5*epsilon
+```
+
+
+### Perform the test of no measurement error
+
+Perform the test using default options:
+
+```
 // perform the test of the hypothesis of no measurement error in X
-dgmtest Y1 X Z, kernel(epan2)
-dgmtest Y2 X Z XL, ql(1) kernel(epan2)
+dgmtest Y1 X Z
+dgmtest Y2 X Z XL, ql(1)
+```
+
+Perform the test, choosing the triangular kernel function:
+
+```
+// perform the test of the hypothesis of no measurement error in X
+dgmtest Y1 X Z, kernel(triangular)
+dgmtest Y2 X Z XL, ql(1) kernel(triangular)
 ```
 
 
 
 # References
+[Delgado, M. and Manteiga, W. (2001), "Significance Testing in Nonparametric Regression Based on the Bootstrap", Annals of Statistics, 29(5), p. 1469-1507](http://www.jstor.org/stable/2699997)
+
 [Robinson, P. M. (1988), "Root-N-Consistent Semiparametric Regression", Econometrica, 56(4), p. 931-954](http://www.jstor.org/stable/1912705)
 
 [Wilhelm, D. (2017), "Testing for the Presence of Measurement Error", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
-
-[Delgado, M. and Manteiga, W. (2001), "Significance Testing in Nonparametric Regression Based on the Bootstrap", Annals of Statistics, 29(5), p. 1469-1507](http://www.jstor.org/stable/2699997)
