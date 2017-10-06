@@ -102,7 +102,9 @@ dgmtest Y2 X Z XL, ql(1) kernel(epan2)
 
 
 
-# Reference
+# References
+[Robinson, P. M. (1988), "Root-N-Consistent Semiparametric Regression", Econometrica, 56(4), p. 931-954](http://www.jstor.org/stable/1912705)
+
 [Wilhelm, D. (2017), "Testing for the Presence of Measurement Error", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
 
-[Delgado, M. and Manteiga, W., "Significance Testing in Nonparametric Regression Based on the Bootstrap", Annals of Statistics, 2001, 29(5), p. 1469-1507](http://www.jstor.org/stable/2699997)
+[Delgado, M. and Manteiga, W. (2001), "Significance Testing in Nonparametric Regression Based on the Bootstrap", Annals of Statistics, 29(5), p. 1469-1507](http://www.jstor.org/stable/2699997)
