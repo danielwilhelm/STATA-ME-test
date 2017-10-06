@@ -20,13 +20,13 @@ Files contained in this package:
 The command `dgmtest` tests the null hypothesis
 
 ```
-H0:   E[Y | X,Z] = E[Y | X]
+H0:   E[Y | X, Z] = E[Y | X]
 ```
 
 or
 
 ```
-H0:   E[Y | X,XL,Z] = E[Y | X,XL]
+H0:   E[Y | X, XL, Z] = E[Y | X, XL]
 ```
 
 against the alternative that the null does not hold, where
