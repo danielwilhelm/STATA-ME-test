@@ -1,7 +1,7 @@
 /*
-	Significance Testing in Nonparametric Regression Based on the Bootstrap
+	Nonparametric Testing for Significance and Presence of Measurement Error
 
-10/09/2017
+09/11/2017
 
 This program is developed for a testing methodology, in Delgado and Gonzalez-Manteiga (AoS, 2001),
 for selecting explanatory variables in nonparametric regression.
@@ -28,16 +28,19 @@ Syntax:
 	qgrid   : quantile probability for maximum or minimum grid points in KS statistic(default = 0)
 
 Outcome:
-	e(bw)     : bandwidth
+	e(N)      : number of observations
 	e(dimX)   : diminsion of X
-	e(dimXL)  : dimension of additively linear control variables XL
 	e(dimZ)   : diminsion of Z
+	e(dimXL)  : dimension of additively linear control variables XL
 	e(stat)   : scalar value of the Cramer-von Mises statistic
 	e(bootnum): number of bootstrap samples
+	e(bw)     : bandwidth
+	e(btpv)   : P[stat < statnstar]
 	e(btcv1)  : bootstrap critical value at 1%
 	e(btcv5)  : bootstrap critical value at 5%
 	e(btcv10) : bootstrap critical value at 10%
-	e(btpv)   : P[stat < statnstar]
+	e(ngrid)  : number of grid points
+	e(qgrid)  : quantile probability for min or max values of grid points
 
 If unspecified, the command runs on a default setting.
 */
@@ -149,6 +152,10 @@ program define dgmtest, eclass
 		}
 
 	// Running main program
+		ereturn local teststat  = "`teststat'"
+		ereturn local kernel 	= "`kernel'"
+		ereturn local bootdist 	= "`bootdist'"
+		
 		mata: test("`Y'","`W'",`q',`ql',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum',`ngrid',`qgrid')
 		display " "
 		display as txt " bandwidth: " as res e(bw)
@@ -200,16 +207,19 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	statst  = mstat(btrs(Y, X, kernel, bw, bootdist, bootnum), W, X, teststat, kernel, bw, ngrid, qgrid)
 	
 	pstat	= sum(statst :> stat)/bootnum
-	st_numscalar("e(bw)", bw)
+	st_numscalar("e(N)", rows(Y))
 	st_numscalar("e(dimX)", q)
-	st_numscalar("e(dimXL)", ql)
 	st_numscalar("e(dimZ)", cols(W)-q)
+	st_numscalar("e(dimXL)", ql)
 	st_numscalar("e(stat)", stat)
-	st_numscalar("e(bootnum)", bootnum)
+	st_numscalar("e(btpv)", pstat)
 	st_numscalar("e(btcv1)", qtile(statst,0.99))
 	st_numscalar("e(btcv5)", qtile(statst,0.95))
 	st_numscalar("e(btcv10)", qtile(statst,0.9))
-	st_numscalar("e(btpv)", pstat)
+	st_numscalar("e(bw)", bw)
+	st_numscalar("e(bootnum)", bootnum)
+	st_numscalar("e(ngrid)", ngrid)
+	st_numscalar("e(qgrid)", qgrid)
 }
 
 // Test statistic for conditional mean and its bootstrap versions
