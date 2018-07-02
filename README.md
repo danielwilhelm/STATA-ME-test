@@ -100,11 +100,11 @@ generate epsilon = runiform()
 We generate an outcome in two different ways, in a regression with and without additively separable, linear controls:
 
 ```
-// outcome equation with controls
+// outcome equation without controls
 generate Y1 = Xstar^2 + 0.2*Xstar + 0.5*epsilon
 
-// outcome equation without controls
-generate Y2 = 0.5*XL + Xstar^2 + 0.2*Xstar + 0.5*epsilon
+// outcome equation with controls
+generate Y2 = Xstar^2 + 0.2*Xstar + 0.5*XL + 0.5*epsilon
 ```
 
 
