@@ -1,22 +1,22 @@
 /*
 	Nonparametric Testing for Significance and Presence of Measurement Error
 
-09/11/2017
+05/07/2018
 
 This program is developed for a testing methodology, in Delgado and Gonzalez-Manteiga (AoS, 2001),
 for selecting explanatory variables in nonparametric regression.
 
-	H0: E(Y|W) = m(X) + a*XL a.s.,
-	where	m(.) = E(Y|X=.),
+	H0: E(Y|X,W,Z) = m(X,W1) + a*W2 a.s.,
+	where	m(.) = E(Y|.),
 			Y is a scalar, and
-			W = (X,Z,XL), X is R^q valued, Z is R^p valued and XL is R^ql valued.
+			(X,W1) is R^q valued, Z is R^p valued and W2 is R^ql valued.
 
 Syntax:
 	dgmtest depvar expvar [if] [in]
 		[, q(integer) ql(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
 	where
-	q       : dimension of X (default = 1)
-	ql      : dimension of additively linear control variables XL (default = 0)
+	q       : dimension of (X,W1) (default = 1)
+	ql      : dimension of additively linear control variables W2 (default = 0)
 	teststat: Test statistic, options: CvM (default), KS
 	kernel  : kernel function
 	          options: biweight, epanechnikov (default), epan2 (DGM, 2001), epan4, normal, rectangle, triangular
@@ -29,9 +29,9 @@ Syntax:
 
 Outcome:
 	e(N)      : number of observations
-	e(dimX)   : diminsion of X
+	e(dimX)   : diminsion of (X,W1)
 	e(dimZ)   : diminsion of Z
-	e(dimXL)  : dimension of additively linear control variables XL
+	e(dimW2)  : dimension of additively linear control variables W2
 	e(stat)   : scalar value of the Cramer-von Mises statistic
 	e(bootnum): number of bootstrap samples
 	e(bw)     : bandwidth
@@ -43,6 +43,7 @@ Outcome:
 	e(qgrid)  : quantile probability for min or max values of grid points
 
 If unspecified, the command runs on a default setting.
+In mata, W=(X,Z,W2) where X=(X,W1).
 */
 
 *************** MAIN DGMTEST CODE ********************************************
@@ -66,10 +67,10 @@ program define dgmtest, eclass
 		
 		display " "
 		if (`ql' == 0) {
-		display "H0: E[Y | X,Z] = E[Y | X]"
+		display "H0: E[Y | X,W1,Z] = E[Y | X,W1]"
 		}
 		else {
-		display "H0: E[Y | XL,X,Z] = a*XL + E[Y | X]"
+		display "H0: E[Y | X,W,Z] = E[Y | X,W1] + a*W2 "
 		}
 		display " "
 		
@@ -138,7 +139,7 @@ program define dgmtest, eclass
 		error 111
 		}
 		
-		if (`ngrid' == 0) {
+		if (`ngrid' == 0 & "`teststat'" == "KS") {
 		display "We use the observation values for KS statistic"
 		}
 		else if (`ngrid' < 0) {
@@ -157,10 +158,12 @@ program define dgmtest, eclass
 		ereturn local bootdist 	= "`bootdist'"
 		
 		mata: test("`Y'","`W'",`q',`ql',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum',`ngrid',`qgrid')
+		
 		display " "
+		display as txt " number of observations: " as res e(N)
 		display as txt " bandwidth: " as res e(bw)
-		display as txt " dimension of X: " as res e(dimX)
-		display as txt " dimension of XL: " as res e(dimXL)
+		display as txt " dimension of (X,W1): " as res e(dimX)
+		display as txt " dimension of W2: " as res e(dimW2)
 		display as txt " dimension of Z: " as res e(dimZ)
 		display as txt " number of bootstrap samples: " as res e(bootnum)
 		
@@ -187,19 +190,25 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	real colvector Y, statst
 	real scalar stat, pstat
 
-	Y = st_data(., yname, 0)
-	W = st_data(., wname, 0)
+	Y = st_data(., yname)
+	W = st_data(., wname)
 	X = W[|1,1 \ rows(Y),q|]
+	if (hasmissing(Y)>0) {
+	exit(_error(3351, "Y has missing values"))
+	}
+	else if (hasmissing(W)>0) {
+	exit(_error(3351, "(X,W,Z) has missing values"))
+	}
 	
 	if (bw == 0) {
 	bw = rows(Y)^(-1/(3*q))
 	}
 	
 	if (ql > 0) {
-	XL  = W[|1,cols(W)-ql+1 \ rows(Y),cols(W)|]
-	eXL = XL - npreg(XL, X, kernel, bw)
+	W2  = W[|1,cols(W)-ql+1 \ rows(Y),cols(W)|]
+	eW2 = W2 - npreg(W2, X, kernel, bw)
 	eY  = Y - npreg(Y, X, kernel, bw)
-	Y   = Y - invsym(eXL'*eXL)*(eXL'*eY)*XL
+	Y   = Y - invsym(eW2'*eW2)*(eW2'*eY)*W2
 	W   = W[|1,1 \ rows(Y),cols(W)-ql|]
 	}
 	
@@ -210,7 +219,7 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	st_numscalar("e(N)", rows(Y))
 	st_numscalar("e(dimX)", q)
 	st_numscalar("e(dimZ)", cols(W)-q)
-	st_numscalar("e(dimXL)", ql)
+	st_numscalar("e(dimW2)", ql)
 	st_numscalar("e(stat)", stat)
 	st_numscalar("e(btpv)", pstat)
 	st_numscalar("e(btcv1)", qtile(statst,0.99))
