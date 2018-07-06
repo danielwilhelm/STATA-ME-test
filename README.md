@@ -2,7 +2,7 @@
 
 Authors : Young Jun Lee and Daniel Wilhelm
 
-This project provides the STATA command `dgmtest` which implements the test for significance by Delgado and Manteiga (2001) and can be used to test for the presence of measurement error as described in Wilhelm (2017).
+This project provides the STATA command `dgmtest` which implements the test for significance by Delgado and Manteiga (2001) and can be used to test for the presence of measurement error as described in Wilhelm (2018).
 
 Files contained in this package:
 
@@ -23,20 +23,19 @@ The command `dgmtest` tests the null hypothesis
 H0:   E[Y | X, Z] = E[Y | X]
 ```
 
-or
-
-```
-H0:   E[Y | X, XL, Z] = E[Y | X, XL]
-```
-
 against the alternative that the null does not hold, where
 
 - Y is a scalar dependent variable (`depvar`)
 - X is a vector of explanatory variables (`expvar`)
 - Z is a vector of explanatory variables (`expvar`)
-- XL is a vector of additively linear control variables (`expvar`)
 
-Wilhelm (2017) shows that, under certain conditions, the null hypothesis H0 is equivalent to the null hypothesis of no measurement error in X. Most importantly, Z has to be an excluded variable for the outcome equation of Y. If we have additively linear control variables, we apply the test in Delgado and Manteiga (2001) after replacing Y with (Y - ahat * XL) where ahat is the Robinson (1988)'s estimator.
+The vector of explanatory variables, X, may contain elements that enter the conditional expectation in a linear, additively separable fashion. For example, decompose X=(X1,X2) where X1 enters nonseparably and X2 enters in a linear, additively separable fashion,
+
+```
+E[Y | X, Z] = f(X1,Z) + pi*X2
+```
+
+where f and g are some functions and pi a row-vector of the same dimension as X2. In the presence of variables X2, we apply the test in Delgado and Manteiga (2001) after replacing Y with (Y - pihat*X2), where pihat is Robinson (1988)'s estimator of pi.
 
 Syntax:
 
@@ -47,12 +46,12 @@ dgmtest depvar expvar [if] [in] [, q(integer) ql(integer) teststat(string) kerne
 where
 
 - `depvar` is the outcome variable Y
-- `expvar` is a list of variables containing all elements of X, Z, and XL (oder of `expvar`: X Z XL)
+- `expvar` is a list of variables containing all elements of X and Z. The order of variables in the list should be: X1 Z X2)
 
 The options are as follows:
 
 - `q` is the dimension of X (default = 1).
-- `ql` is the dimension of XL (default = 0).
+- `ql` is the dimension of X2 (default = 0).
 - `teststat` is the type of test statistic to be used: Cramer-van Mises (CvM, default) or Kolmogorov-Smirnov (KS).
 - `kernel` is the kernel function: biweight, epanechnikov (default), epan2, epan4, normal, rectangle, triangular.
 - `bw` is the bandwidth (default = n^(-1/3q), rule of thumb, where n is the sample size and q the dimension of X).
@@ -62,6 +61,12 @@ The options are as follows:
 - `qgrid` is a number between 0 and 1 to define the min and max values of the grid in the previous option. The min value is the `qgrid`-quantile and the max value is the (1-`qgrid`)-quantile. The default is 0 so that in that case the grid ranges from the min to the max value in the sample.
 
 If options are left unspecified, the command runs on the default settings.
+
+
+## Testing for the presence of measurement error
+
+Wilhelm (2018) shows that, under some conditions, the null hypothesis H0 is equivalent to the hypothesis of no measurement error in X1. In this context, the variable Z must be excluded from the outcome equation. For example, it could be a second measurement or an instrumental variable. See Wilhelm (20018) and Lee and Wilhelm (2018) for details and examples.
+
 
 
 ## Examples
@@ -79,10 +84,10 @@ generate Xstar = runiform()
 generate etaX = runiform()
 
 // mismeasured regressor
-generate X = Xstar + 0.5*etaX
+generate X1 = Xstar + 0.5*etaX
 
 // additively linear control variable
-generate XL = runiform()
+generate X2 = runiform()
 
 // measurement error in Z
 generate etaZ = runiform()
@@ -104,7 +109,7 @@ We generate an outcome in two different ways, in a regression with and without a
 generate Y1 = Xstar^2 + 0.2*Xstar + 0.5*epsilon
 
 // outcome equation with controls
-generate Y2 = Xstar^2 + 0.2*Xstar + 0.5*XL + 0.5*epsilon
+generate Y2 = Xstar^2 + 0.2*Xstar + 0.5*X2 + 0.5*epsilon
 ```
 
 
@@ -113,17 +118,17 @@ generate Y2 = Xstar^2 + 0.2*Xstar + 0.5*XL + 0.5*epsilon
 Perform the test using default options:
 
 ```
-// perform the test of the hypothesis of no measurement error in X
-dgmtest Y1 X Z
-dgmtest Y2 X Z XL, ql(1)
+// perform the test of the hypothesis of no measurement error in X1
+dgmtest Y1 X1 Z
+dgmtest Y2 X1 Z X2, ql(1)
 ```
 
 Perform the test, choosing the triangular kernel function:
 
 ```
-// perform the test of the hypothesis of no measurement error in X
-dgmtest Y1 X Z, kernel(triangular)
-dgmtest Y2 X Z XL, ql(1) kernel(triangular)
+// perform the test of the hypothesis of no measurement error in X1
+dgmtest Y1 X1 Z, kernel(triangular)
+dgmtest Y2 X1 Z X2, ql(1) kernel(triangular)
 ```
 
 
@@ -133,4 +138,6 @@ dgmtest Y2 X Z XL, ql(1) kernel(triangular)
 
 [Robinson, P. M. (1988), "Root-N-Consistent Semiparametric Regression", Econometrica, 56(4), p. 931-954](http://www.jstor.org/stable/1912705)
 
-[Wilhelm, D. (2017), "Testing for the Presence of Measurement Error", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
+[Wilhelm, D. (2018), "Testing for the Presence of Measurement Error", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
+
+[Lee, Y. and Wilhelm, D. (2018), "Testing for the Presence of Measurement Error in Stata", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
