@@ -1,7 +1,7 @@
 /*
 	Nonparametric Testing for Significance and Presence of Measurement Error
 
-05/07/2018
+06/07/2018
 
 This program is developed for a testing methodology, in Delgado and Gonzalez-Manteiga (AoS, 2001),
 for selecting explanatory variables in nonparametric regression.
@@ -55,12 +55,15 @@ program define dgmtest, eclass
 		ereturn local cmd = "dgmtest"
 		ereturn local title  = "Nonparametric Significance Test"
 		marksample touse
-		
+				
 		gettoken Y W : varlist
 		local Y `Y'
 		local W `W'
-	
-	
+		
+		preserve
+		if `"`if'`in'"' != "" qui keep `if' `in'
+		
+		
 		display "----------------------------------------------------- "
 		display " Delgado and Manteiga test
 		display	"----------------------------------------------------- "
@@ -76,8 +79,8 @@ program define dgmtest, eclass
 		
 		display "----- parameter settings -----"
 		display " "
-	
-	
+
+		
 	// Checking inputs
 		// q should be a positive integer, but less than p+q, dimension of W
 		if (`q' < 1) {
