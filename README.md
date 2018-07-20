@@ -138,6 +138,6 @@ dgmtest Y2 X1 Z X2, ql(1) kernel(triangular)
 
 [Robinson, P. M. (1988), "Root-N-Consistent Semiparametric Regression", Econometrica, 56(4), p. 931-954](http://www.jstor.org/stable/1912705)
 
-[Wilhelm, D. (2018), "Testing for the Presence of Measurement Error", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
+[Wilhelm, D. (2018), "Testing for the Presence of Measurement Error", CeMMAP Working Paper CWP45/18](http://www.ucl.ac.uk/~uctpdwi/papers/cwp451818.pdf)
 
 [Lee, Y. and Wilhelm, D. (2018), "Testing for the Presence of Measurement Error in Stata", working paper available soon](http://www.ucl.ac.uk/~uctpdwi)
