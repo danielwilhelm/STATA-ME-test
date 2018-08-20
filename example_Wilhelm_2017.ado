@@ -1,7 +1,7 @@
 /*
-	Monte Carlo study in Wilhelm (2017, working)
+	Monte Carlo study in Wilhelm (2018, working)
 	
-25/10/2017
+20/08/2018
 
 Samples are generated according to the model
 	
@@ -13,7 +13,7 @@ Samples are generated according to the model
 	Modify (1) the number of observation,
 	       (2) sigME and lamb to change stanard deviation of ME in X, or
 	       (3) add specific option values in dgmtest
-	           default: q(1) ql(0) teststat(CvM) kernel(epanechnikov) bw(0) bootdist(mammen) bootnum(500) ngrid(0) qgrid(0)
+	           default: qx(1) q1(0) q2(0) teststat(CvM) kernel(epanechnikov) bw(0) bootdist(mammen) bootnum(500) ngrid(0) qgrid(0)
 */
 
 *************** EXAMPLE_WILHELM_2017 CODE *******************************************
