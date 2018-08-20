@@ -1,7 +1,7 @@
 /*
 	Nonparametric Testing for Significance and Presence of Measurement Error
 
-06/07/2018
+20/08/2018
 
 This program is developed for a testing methodology, in Delgado and Gonzalez-Manteiga (AoS, 2001),
 for selecting explanatory variables in nonparametric regression.
@@ -9,14 +9,15 @@ for selecting explanatory variables in nonparametric regression.
 	H0: E(Y|X,W,Z) = m(X,W1) + a*W2 a.s.,
 	where	m(.) = E(Y|.),
 			Y is a scalar, and
-			(X,W1) is R^q valued, Z is R^p valued and W2 is R^ql valued.
+			X is R^qx valued, Z is R^p valued, W1 is R^q1 valued and W2 is R^q2 valued.
 
 Syntax:
 	dgmtest depvar expvar [if] [in]
-		[, q(integer) ql(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
+		[, qx(integer) q1(integer) q2(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
 	where
-	q       : dimension of (X,W1) (default = 1)
-	ql      : dimension of additively linear control variables W2 (default = 0)
+	qx      : dimension of X (default = 1)
+	q1      : dimension of additively linear control variables W2 (default = 0)
+	q2      : dimension of additively linear control variables W2 (default = 0)
 	teststat: Test statistic, options: CvM (default), KS
 	kernel  : kernel function
 	          options: biweight, epanechnikov (default), epan2 (DGM, 2001), epan4, normal, rectangle, triangular
@@ -29,9 +30,10 @@ Syntax:
 
 Outcome:
 	e(N)      : number of observations
-	e(dimX)   : diminsion of (X,W1)
+	e(dimX)   : diminsion of X
+	e(dimW1)  : diminsion of nonseparable and correctly measured control variables W1
 	e(dimZ)   : diminsion of Z
-	e(dimW2)  : dimension of additively linear control variables W2
+	e(dimW2)  : dimension of additively linear and correctly measured control variables W2
 	e(stat)   : scalar value of the Cramer-von Mises statistic
 	e(bootnum): number of bootstrap samples
 	e(bw)     : bandwidth
@@ -43,14 +45,14 @@ Outcome:
 	e(qgrid)  : quantile probability for min or max values of grid points
 
 If unspecified, the command runs on a default setting.
-In mata, W=(X,Z,W2) where X=(X,W1).
+In mata, W=(X,W1,Z,W2).
 */
 
 *************** MAIN DGMTEST CODE ********************************************
 program define dgmtest, eclass
 		version 12
 		
-		syntax varlist(min=2) [if] [in] [, q(integer 1) ql(integer 0) teststat(string) kernel(string) bw(real 0) bootdist(string) bootnum(integer 500) ngrid(integer 0) qgrid(real 0)]
+		syntax varlist(min=2) [if] [in] [, qx(integer 1) q1(integer 0) q2(integer 0) teststat(string) kernel(string) bw(real 0) bootdist(string) bootnum(integer 500) ngrid(integer 0) qgrid(real 0)]
 		ereturn clear
 		ereturn local cmd = "dgmtest"
 		ereturn local title  = "Nonparametric Significance Test"
@@ -69,7 +71,7 @@ program define dgmtest, eclass
 		display	"----------------------------------------------------- "
 		
 		display " "
-		if (`ql' == 0) {
+		if (`q2' == 0) {
 		display "H0: E[Y | X,W1,Z] = E[Y | X,W1]"
 		}
 		else {
@@ -83,13 +85,18 @@ program define dgmtest, eclass
 		
 	// Checking inputs
 		// q should be a positive integer, but less than p+q, dimension of W
-		if (`q' < 1) {
-		display "q should be a positive integer"
+		if (`qx' < 1) {
+		display "qx should be a positive integer"
 		error 111
 		}
 		
-		if (`ql' < 0) {
-		display "ql should be a nonnegative integer"
+		if (`q1' < 0) {
+		display "q1 should be a nonnegative integer"
+		error 111
+		}
+		
+		if (`q2' < 0) {
+		display "q2 should be a nonnegative integer"
 		error 111
 		}
 		
@@ -160,12 +167,13 @@ program define dgmtest, eclass
 		ereturn local kernel 	= "`kernel'"
 		ereturn local bootdist 	= "`bootdist'"
 		
-		mata: test("`Y'","`W'",`q',`ql',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum',`ngrid',`qgrid')
+		mata: test("`Y'","`W'",`qx',`q1',`q2',"`teststat'","`kernel'",`bw',"`bootdist'",`bootnum',`ngrid',`qgrid')
 		
 		display " "
 		display as txt " number of observations: " as res e(N)
 		display as txt " bandwidth: " as res e(bw)
-		display as txt " dimension of (X,W1): " as res e(dimX)
+		display as txt " dimension of X: " as res e(dimX)
+		display as txt " dimension of W1: " as res e(dimW1)
 		display as txt " dimension of W2: " as res e(dimW2)
 		display as txt " dimension of Z: " as res e(dimZ)
 		display as txt " number of bootstrap samples: " as res e(bootnum)
@@ -185,16 +193,17 @@ end
 mata:
 
 // Significance test
-void test(string scalar yname, string scalar wname, real scalar q,
-          real scalar ql, string scalar teststat, string scalar kernel,
+void test(string scalar yname, string scalar wname, real scalar qx,
+		real scalar q1, real scalar q2, string scalar teststat, string scalar kernel,
 	  real scalar bw, string scalar bootdist, real scalar bootnum,
 	  real scalar ngrid, real scalar qgrid)
 {	real matrix W, X
 	real colvector Y, statst
-	real scalar stat, pstat
+	real scalar q, stat, pstat
 
 	Y = st_data(., yname)
 	W = st_data(., wname)
+	q = qx + q1
 	X = W[|1,1 \ rows(Y),q|]
 	if (hasmissing(Y)>0) {
 	exit(_error(3351, "Y has missing values"))
@@ -207,12 +216,12 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	bw = rows(Y)^(-1/(3*q))
 	}
 	
-	if (ql > 0) {
-	W2  = W[|1,cols(W)-ql+1 \ rows(Y),cols(W)|]
+	if (q2 > 0) {
+	W2  = W[|1,cols(W)-q2+1 \ rows(Y),cols(W)|]
 	eW2 = W2 - npreg(W2, X, kernel, bw)
 	eY  = Y - npreg(Y, X, kernel, bw)
 	Y   = Y - invsym(eW2'*eW2)*(eW2'*eY)*W2
-	W   = W[|1,1 \ rows(Y),cols(W)-ql|]
+	W   = W[|1,1 \ rows(Y),cols(W)-q2|]
 	}
 	
 	stat	= mstat(Y, W, X, teststat, kernel, bw, ngrid, qgrid)
@@ -220,9 +229,10 @@ void test(string scalar yname, string scalar wname, real scalar q,
 	
 	pstat	= sum(statst :> stat)/bootnum
 	st_numscalar("e(N)", rows(Y))
-	st_numscalar("e(dimX)", q)
+	st_numscalar("e(dimX)", qx)
 	st_numscalar("e(dimZ)", cols(W)-q)
-	st_numscalar("e(dimW2)", ql)
+	st_numscalar("e(dimW1)", q1)
+	st_numscalar("e(dimW2)", q2)
 	st_numscalar("e(stat)", stat)
 	st_numscalar("e(btpv)", pstat)
 	st_numscalar("e(btcv1)", qtile(statst,0.99))
