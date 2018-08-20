@@ -1,7 +1,7 @@
 /*
 	Monte Carlo study in Delgado and Gonzalez Manteiga (AoS, 2001)
 	
-10/09/2017
+20/08/2018
 
 Samples are generated according to the model
 	
@@ -15,7 +15,7 @@ Samples are generated according to the model
 	Modify (1) the number of observation,
 	       (2) depvar and expvar following the settings in DGM (AoS, 2001), or
 	       (3) add specific option values in dgmtest
-	           default: q(1) ql(0) teststat(CvM) kernel(epanechnikov) bw(0) bootdist(mammen) bootnum(500) ngrid(0) qgrid(0)
+	           default: qx(1) q1(0) q2(0) teststat(CvM) kernel(epanechnikov) bw(0) bootdist(mammen) bootnum(500) ngrid(0) qgrid(0)
 */
 
 *************** SIMUL_DGMTEST CODE *******************************************
@@ -51,7 +51,7 @@ generate Y42 = 1 + X1 + X2 + sin(10*Z1) + U
 
 // Bootstrap Significance Testing
 // e.g., Table 1.2: dgmtest Y11 X1 Z1 Z2 [, options]
-// e.g., Table 4.1: dgmtest Y41 X1 X2 Z1, q(2) [other options]
-dgmtest Y42 X1 X2 Z1, q(2) kernel(epan2) bootnum(2000)
+// e.g., Table 4.1: dgmtest Y41 X1 X2 Z1, qx(2) [other options]
+dgmtest Y42 X1 X2 Z1, qx(2) kernel(epan2) bootnum(2000)
 
 end
