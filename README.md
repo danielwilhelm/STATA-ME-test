@@ -40,18 +40,18 @@ where f and g are some functions and pi a row-vector of the same dimension as X2
 Syntax:
 
 ```
-dgmtest depvar expvar [if] [in] [, q(integer) ql(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
+dgmtest depvar expvar [if] [in] [, qz(integer) qw2(integer) teststat(string) kernel(string) bootdist(string) bw(real) bootnum(integer) ngrid(integer) qgrid(real)]
 ```
 
 where
 
 - `depvar` is the outcome variable Y
-- `expvar` is a list of variables containing all elements of X and Z. The order of variables in the list should be: X1 Z X2)
+- `expvar` is a list of variables containing all elements of X and Z. The order of variables in the list should be: X1 X2 Z)
 
 The options are as follows:
 
-- `q` is the dimension of X (default = 1).
-- `ql` is the dimension of X2 (default = 0).
+- `qz` is the dimension of Z (default = 1).
+- `qw2` is the dimension of X2 (default = 0).
 - `teststat` is the type of test statistic to be used: Cramer-van Mises (CvM, default) or Kolmogorov-Smirnov (KS).
 - `kernel` is the kernel function: biweight, epanechnikov (default), epan2, epan4, normal, rectangle, triangular.
 - `bw` is the bandwidth (default = n^(-1/3q), rule of thumb, where n is the sample size and q the dimension of X).
@@ -65,7 +65,7 @@ If options are left unspecified, the command runs on the default settings.
 
 ## Testing for the presence of measurement error
 
-Wilhelm (2018) shows that, under some conditions, the null hypothesis H0 is equivalent to the hypothesis of no measurement error in X1. In this context, the variable Z must be excluded from the outcome equation. For example, it could be a second measurement or an instrumental variable. See Wilhelm (20018) and Lee and Wilhelm (2018) for details and examples.
+Wilhelm (2018) shows that, under some conditions, the null hypothesis H0 is equivalent to the hypothesis of no measurement error in X1. In this context, the variable Z must be excluded from the outcome equation. For example, it could be a second measurement or an instrumental variable. See Wilhelm (2018) and Lee and Wilhelm (2018) for details and examples.
 
 
 
@@ -120,7 +120,7 @@ Perform the test using default options:
 ```
 // perform the test of the hypothesis of no measurement error in X1
 dgmtest Y1 X1 Z
-dgmtest Y2 X1 Z X2, ql(1)
+dgmtest Y2 X1 X2 Z, qw2(1)
 ```
 
 Perform the test, choosing the triangular kernel function:
@@ -128,7 +128,7 @@ Perform the test, choosing the triangular kernel function:
 ```
 // perform the test of the hypothesis of no measurement error in X1
 dgmtest Y1 X1 Z, kernel(triangular)
-dgmtest Y2 X1 Z X2, ql(1) kernel(triangular)
+dgmtest Y2 X1 X2 Z, qw2(1) kernel(triangular)
 ```
 
 
