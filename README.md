@@ -54,7 +54,7 @@ The options are as follows:
 - `qw2` is the dimension of X2 (default = 0).
 - `teststat` is the type of test statistic to be used: Cramer-van Mises (CvM, default) or Kolmogorov-Smirnov (KS).
 - `kernel` is the kernel function: biweight, epanechnikov (default), epan2, epan4, normal, rectangle, triangular.
-- `bw` is the bandwidth (default = n^(-1/3q), rule of thumb, where n is the sample size and q the dimension of X).
+- `bw` is the bandwidth (default = n^(-1/3q), rule of thumb, where n is the sample size and q the dimension of X1).
 - `bootnum` is the number of bootstrap samples for the computation of the test's critical value (default = 500).
 - `bootdist` is the distribution of the bootstrap multiplier variable: mammen (default), rademacher, uniform.
 - `ngrid` is the number of equally spaced grid points used to compute the supremum of the KS statistic, if that statistic is chosen via the option `teststat`. The default is 0 which means that the sample serves as the grid.
