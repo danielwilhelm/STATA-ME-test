@@ -201,7 +201,7 @@ void test(string scalar yname, string scalar wname, real scalar qz,
 	else if (hasmissing(W)>0) {
 	exit(_error(3351, "(X,W,Z) has missing values"))
 	}
-	else if (q == 0) {
+	else if (q < 1) {
 	exit(_error(102, "dim(X,W1) should be a positive integer"))
 	}
 	X = W[|1,1 \ rows(Y),q|]
