@@ -9,8 +9,8 @@ Samples are generated according to the model
 	where
 	U ~ N(0,1)
 	X,Z ~ i.i.d. U(0,1) and independent of U
-	e.g., m(X) = 1 + X or m(X) = 1 + sin(10*X);
-	e.g., XL = X1, m(X) = 1 + X2
+	e.g., m(X) = 1 + X1 or m(X) = 1 + sin(10*X1);
+	e.g., XL = X2, m(X) = 1 + X1
 
 	Modify (1) the number of observation,
 	       (2) depvar and expvar following the settings in DGM (AoS, 2001), or
@@ -18,8 +18,8 @@ Samples are generated according to the model
 	           default: qz(1) qw2(0) teststat(CvM) kernel(epanechnikov) bw(0) bootdist(mammen) bootnum(500) ngrid(0) qgrid(0)
 */
 
-*************** SIMUL_DGMTEST CODE *******************************************
-program define simul_dgmtest, eclass
+*************** example_DGM2001 CODE *******************************************
+program define example_DGM2001, eclass
 
 capture program drop dgmtest
 clear
