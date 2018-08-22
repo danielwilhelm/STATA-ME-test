@@ -7,7 +7,7 @@ This project provides the STATA command `dgmtest` which implements the test for 
 Files contained in this package:
 
 - The file `dgmtest.ado` contains the `dgmtest` command.
-- The file `simul_dgmtest.ado` contains code to replicate the simulations in Delgado and Manteiga (2001).
+- The file `example_DGM2001.ado` contains code to replicate the simulations in Delgado and Manteiga (2001).
 - The file `example.do` contains the simple simulation example shown below.
 
 
