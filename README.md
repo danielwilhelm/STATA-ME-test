@@ -7,7 +7,9 @@ This project provides the STATA command `dgmtest` which implements the test for 
 Files contained in this package:
 
 - The file `dgmtest.ado` contains the `dgmtest` command.
-- The file `example_DGM2001.ado` contains code to replicate the simulations in Delgado and Manteiga (2001).
+- The file `dgmtest.sthlp` contains the Stata helpfile for the `dgmtest` command.
+- The files `example_DGM2001.ado` and `simul_DGM2001.do` contain the code to replicate the simulations in Delgado and Manteiga (2001).
+- The files `example_Wilhelm2018.ado` and `simul_Wilhelm2018.do` contain the code to replicate the simulations in Wilhelm (2018).
 - The file `example.do` contains the simple simulation example shown below.
 
 
@@ -20,22 +22,22 @@ Files contained in this package:
 The command `dgmtest` tests the null hypothesis
 
 ```
-H0:   E[Y | X, Z] = E[Y | X]
+H0:   E[Y | X, W, Z] = E[Y | X, W]
 ```
 
 against the alternative that the null does not hold, where
 
-- Y is a scalar dependent variable (`depvar`)
-- X is a vector of explanatory variables (`expvar`)
-- Z is a vector of explanatory variables (`expvar`)
+- Y is a scalar dependent variable
+- X and W are vectors of explanatory variables
+- Z is a vector of explanatory variables
 
-The vector of explanatory variables, X, may contain elements that enter the conditional expectation in a linear, additively separable fashion. For example, decompose X=(X1,X2) where X1 enters nonseparably and X2 enters in a linear, additively separable fashion,
+The vector of explanatory variables, W, may contain elements that enter the conditional expectation in a linear, additively separable fashion. For example, decompose W=(W1,W2) where W1 enters nonseparably and W2 enters in a linear, additively separable fashion,
 
 ```
-E[Y | X, Z] = f(X1,Z) + pi*X2
+E[Y | X, W, Z] = f(X,W1,Z) + pi*W2
 ```
 
-where f and g are some functions and pi a row-vector of the same dimension as X2. In the presence of variables X2, we apply the test in Delgado and Manteiga (2001) after replacing Y with (Y - pihat*X2), where pihat is Robinson (1988)'s estimator of pi.
+where f is some function and pi a row-vector of the same dimension as W2. In the presence of variables W2, we apply the test in Delgado and Manteiga (2001) after replacing Y with (Y - pihat*W2), where pihat is Robinson (1988)'s estimator of pi.
 
 Syntax:
 
@@ -46,12 +48,12 @@ dgmtest depvar expvar [if] [in] [, qz(integer) qw2(integer) teststat(string) ker
 where
 
 - `depvar` is the outcome variable Y
-- `expvar` is a list of variables containing all elements of X and Z. The order of variables in the list should be: X1 X2 Z)
+- `expvar` is a list of variables containing all elements of X, W, and Z. The order of variables in the list should be: X, W, Z)
 
 The options are as follows:
 
 - `qz` is the dimension of Z (default = 1).
-- `qw2` is the dimension of X2 (default = 0).
+- `qw2` is the dimension of W2 (default = 0).
 - `teststat` is the type of test statistic to be used: Cramer-van Mises (CvM, default) or Kolmogorov-Smirnov (KS).
 - `kernel` is the kernel function: biweight, epanechnikov (default), epan2, epan4, normal, rectangle, triangular.
 - `bw` is the bandwidth (default = n^(-1/3q), rule of thumb, where n is the sample size and q the dimension of X1).
@@ -65,7 +67,7 @@ If options are left unspecified, the command runs on the default settings.
 
 ## Testing for the presence of measurement error
 
-Wilhelm (2018) shows that, under some conditions, the null hypothesis H0 is equivalent to the hypothesis of no measurement error in X1. In this context, the variable Z must be excluded from the outcome equation. For example, it could be a second measurement or an instrumental variable. See Wilhelm (2018) and Lee and Wilhelm (2018) for details and examples.
+Wilhelm (2018) shows that, under some conditions, the null hypothesis H0 is equivalent to the hypothesis of no measurement error in X. In this context, the variable Z must be excluded from the outcome equation. For example, it could be a second measurement or an instrumental variable. See Wilhelm (2018), Lee and Wilhelm (2018), and the examples below for more details.
 
 
 
