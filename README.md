@@ -2,7 +2,7 @@
 
 Authors : Young Jun Lee and Daniel Wilhelm
 
-This project provides the STATA command `dgmtest` which implements the test for significance by Delgado and Manteiga (2001) and can be used to test for the presence of measurement error as described in Wilhelm (2018).
+This project provides the STATA command `dgmtest` which implements the test for significance by Delgado and Manteiga (2001) and can be used to test for the presence of measurement error as described in Wilhelm (2018) and Lee and Wilhelm (2018).
 
 Files contained in this package:
 
