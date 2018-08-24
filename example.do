@@ -21,9 +21,11 @@ generate Z = Xstar + 0.5*etaZ
 // regression error
 generate epsilon = runiform()
 
-// outcome equation
+// outcome equation without additional control W2
 generate Y1 = Xstar^2 + 0.2*Xstar + 0.5*epsilon
-generate Y2 = 0.5*W2 + Xstar^2 + 0.2*Xstar + 0.5*epsilon
+
+// outcome equation with additional control W2
+generate Y2 = Xstar^2 + 0.2*Xstar + 0.5*W2 + 0.5*epsilon
 
 // perform the test of the hypothesis of no measurement error in X
 dgmtest Y1 X Z, kernel(epan2)
